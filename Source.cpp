@@ -140,7 +140,7 @@ int Minimax(int depth, bool isMax) {
         int best = -1000;
         for (int i = 0; i < 9; i++) {
             if (board[i] == ' ') {
-                board[i] = 'O'; // Симуляція ходу штучного інтелекту
+                board[i] = 'O'; // Симуляція ходу бота
                 best = (std::max)(best, Minimax(depth + 1, false));
                 board[i] = ' '; // Відкат стану поля (Backtracking)
             }
