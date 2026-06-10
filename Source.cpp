@@ -19,14 +19,16 @@ HWND btnEasy, btnMedium, btnHard, btnTheme, btnBackToMenu;
 
 // Прапорці стану поточної ігрової сесії
 bool gameOver = false;
-int difficultyMode = 0;
 bool gameActive = false;
 bool isGreenTheme = false;
 bool isBotThinking = false;
+int difficultyMode = 0;
 
-// Змінні для збереження та виведення фінального графічного результату гри
-std::wstring endResultText = L"";
+// Затримка виведення результату гри
 int pendingResult = 0;
+
+// Фінальний графічний результат гри
+std::wstring endResultText = L"";
 
 // Визначення кольорів у форматі RGB для синьої та зеленої тем оформлення
 COLORREF blueBg = RGB(20, 30, 50), blueCard = RGB(45, 60, 90), blueAccent = RGB(0, 225, 255), blueAlt = RGB(190, 130, 255);
@@ -67,37 +69,37 @@ void UpdateThemeColors() {
 }
 
 /**
- * Малювання вертикального градієнта на контексті пристрою за допомогою Win32 GDI
- * @param hdc Контекст пристрою для малювання (Handle to Device Context)
- * @param rect Межі області промальовування
- * @param top Колір верхньої межі градієнта
- * @param bottom Колір нижньої межі градієнта
+ * Малювання вертикального градієнта за допомогою Win32 GDI
+ * @param ontextGradient Контекст градфенту для малювання
+ * @param rectForGradient Межі області промальовування
+ * @param topGradientColor Колір верхньої межі градієнта
+ * @param bottomGradientColor Колір нижньої межі градієнта
  */
-void DrawGradient(HDC hdc, RECT rect, COLORREF top, COLORREF bottom) {
+void DrawGradient(HDC ontextGradient, RECT rectForGradient, COLORREF topGradientColor, COLORREF bottomGradientColor) {
     TRIVERTEX v[2];
     // Конвертація 8-бітних кольорів RGB у 16-бітні значення для функції GradientFill
-    v[0].x = rect.left; v[0].y = rect.top; v[0].Red = (COLOR16)(GetRValue(top) << 8); v[0].Green = (COLOR16)(GetGValue(top) << 8); v[0].Blue = (COLOR16)(GetBValue(top) << 8); v[0].Alpha = 0;
-    v[1].x = rect.right; v[1].y = rect.bottom; v[1].Red = (COLOR16)(GetRValue(bottom) << 8); v[1].Green = (COLOR16)(GetGValue(bottom) << 8); v[1].Blue = (COLOR16)(GetBValue(bottom) << 8); v[1].Alpha = 0;
+    v[0].x = rectForGradient.left; v[0].y = rectForGradient.top; v[0].Red = (COLOR16)(GetRValue(topGradientColor) << 8); v[0].Green = (COLOR16)(GetGValue(topGradientColor) << 8); v[0].Blue = (COLOR16)(GetBValue(topGradientColor) << 8); v[0].Alpha = 0;
+    v[1].x = rectForGradient.right; v[1].y = rectForGradient.bottom; v[1].Red = (COLOR16)(GetRValue(bottomGradientColor) << 8); v[1].Green = (COLOR16)(GetGValue(bottomGradientColor) << 8); v[1].Blue = (COLOR16)(GetBValue(bottomGradientColor) << 8); v[1].Alpha = 0;
     GRADIENT_RECT g = { 0, 1 };
-    GradientFill(hdc, v, 2, &g, 1, GRADIENT_FILL_RECT_V); // Системний рендеринг вертикального градієнта
+    GradientFill(ontextGradient, v, 2, &g, 1, GRADIENT_FILL_RECT_V); // Системний рендеринг вертикального градієнта
 }
 
 /**
  * Перемикання станів відображення між вікном головного меню та ігровим полем
- * @param visible true — показати головне меню, false — приховати його та показати ігрову сітку
+ * @param isVisibleMainMenu true — показати головне меню, false — приховати його та показати ігрову сітку
  * @param hwnd Дескриптор головного вікна програми
  */
-void ShowMenu(bool visible, HWND hwnd) {
-    int cmd = visible ? SW_SHOW : SW_HIDE;
+void ShowMenu(bool isVisibleMainMenu, HWND hwnd) {
+    int cmd = isVisibleMainMenu ? SW_SHOW : SW_HIDE;
     // Зміна стану видимості кнопок режимів та налаштувань
     ShowWindow(btnEasy, cmd); ShowWindow(btnMedium, cmd); ShowWindow(btnHard, cmd); ShowWindow(btnTheme, cmd);
 
     // Відображення або приховування ігрових кнопок сітки 3х3
-    for (int i = 0; i < 9; i++) ShowWindow(buttons[i], visible ? SW_HIDE : SW_SHOW);
+    for (int i = 0; i < 9; i++) ShowWindow(buttons[i], isVisibleMainMenu ? SW_HIDE : SW_SHOW);
     ShowWindow(btnBackToMenu, SW_HIDE);
 
-    gameActive = !visible;
-    if (visible) {
+    gameActive = !isVisibleMainMenu;
+    if (isVisibleMainMenu) {
         gameOver = false;
         isBotThinking = false;
         endResultText = L"";
